@@ -243,29 +243,87 @@ Referências (arquivos de código, ADRs relacionadas)
 
 ## 12. Legibilidade (obrigatório)
 
-O leitor tem pressa e escaneia a página. Prosa é exceção, estrutura é regra.
+Objetivo: o leitor entende o componente em 1 minuto rolando a página. Tabela em excesso é tão ruim quanto prosa em excesso. Variedade de formato é o que torna a página escaneável.
 
-| Se o conteúdo for... | Use |
-|---|---|
-| Contexto ou motivo (o "porquê") | Prosa, no máximo 3 frases por parágrafo |
-| Enumeração de 3 ou mais itens numa frase | Lista |
-| Itens com 2 ou mais atributos (variáveis, endpoints, tabelas, erros) | Tabela |
-| Lógica condicional (se/senão, fallback) | Tabela de decisão `Condição \| Comportamento`, em ordem de prioridade |
-| Sequência de 3 ou mais passos | Lista numerada |
-| Fluxo entre 2 ou mais componentes | Diagrama |
-| Comparação entre variantes (triggers, ambientes, modos) | Tabela lado a lado |
-| Risco, limitação ou comportamento não óbvio | `warning` ou `note` |
-| Setup local ou dica de desenvolvimento | `tip` dentro de `expand` |
+### 12.1 Escolha do formato (siga na ordem e use o PRIMEIRO que servir)
 
-Regras complementares:
-- Toda página de componente e a Visão Geral abrem com um `panel` "Resumo rápido" de até 5 itens: o que faz, quando roda, entradas, saídas, onde falha.
-- Expressão cron sempre acompanhada da tradução em linguagem humana e do fuso. Exemplo: `0 0 10 * * 1` = toda segunda às 10:00 UTC. Se o fuso não estiver explícito no código ou na configuração, pergunte.
-- Diagramas: use o mesmo recurso de diagrama já usado nas páginas C4 do espaço. Se não identificar qual, pergunte no plano. Nunca publique texto de Mermaid ou PlantUML sem macro que o renderize.
-- No máximo 2 nomes técnicos por frase de texto corrido. Acima disso, vira lista ou tabela.
-- Padrões de tabela:
-  - Configuração: `Variável | Finalidade | Origem (app setting / Key Vault) | Obrigatória`
-  - Erros: `Cenário | Comportamento | Retorno / Log`
-  - Dependências: `Dependência | Tipo | Uso | Configurada por`
-  - Triggers: `Trigger | Tipo | Agenda ou rota | Autenticação | Tratamento de erro | Retorno`
+1. **Exemplo concreto** em `code` ou `noformat`: quando o conteúdo é um artefato (arquivo, payload, request, linha de log, comando). Um exemplo real vale mais que uma tabela descrevendo o artefato.
+2. **Lista simples**: enumerações e pares rótulo/valor, no formato `**Rótulo:** valor`.
+3. **Lista numerada**: passos em sequência.
+4. **Prosa curta** (até 3 frases): o porquê, o contexto, a consequência.
+5. **Tabela**: SOMENTE com 3 ou mais linhas E 3 ou mais colunas, quando o leitor precisa comparar valores entre linhas.
+6. **Macro de destaque** (`warning`, `note`, `tip`): risco, comportamento não óbvio, setup local (`tip` dentro de `expand`).
+
+### 12.2 Limites duros
+
+- **Tabela de 2 colunas é proibida.** Vira lista `**Rótulo:** valor`.
+- **Máximo 1 tabela por seção de nível 2**, exceto a tabela de nomes por ambiente (DV/HO/PR).
+- **Nunca duas tabelas seguidas.** Entre elas deve haver um subtítulo ou uma frase dizendo o que a próxima responde.
+- **Um fato aparece uma única vez na página.** Se ele caberia em duas seções (ex.: retorno 200/500 do trigger HTTP em "Falhas" e em "Operação"), fica em uma só e a outra aponta com `anchor`.
+- **Coluna que repete informação de outra tabela ou seção deve ser removida** (ex.: "Obrigatória" repetindo a lógica de fallback de autenticação).
+- **Conteúdo de outro componente vale no máximo 1 frase e um link** para a página dele (ex.: como o ADF consome o CSV pertence à página do ADF, seção 7).
+- **O painel "Resumo rápido" substitui a seção "Resumo".** Não crie os dois.
+- Tabela só com itens da mesma natureza. Não misture eventos de log com configurações ou observações.
+
+### 12.3 Resumo rápido
+
+Painel no topo das páginas de componente e da Visão Geral, com até 5 itens: o que faz, quando roda, entradas, saídas, onde falha. Cada item traz um fato concreto, nunca genérico, e não repete a frase de abertura.
+
+- Ruim: `Onde falha: falhas seguem tratamento diferente conforme o trigger.`
+- Bom: `Onde falha: se o timer falhar não há alerta; o ADF segue usando o último CSV gravado.`
+
+### 12.4 Diagramas
+
+- Antes de propor diagrama, leia o storage format das páginas C4 do espaço e identifique o recurso usado (macro de diagrama ou imagem anexada).
+- Só use macro cujo nome você encontrou literalmente no storage format de uma página existente do espaço. **`mermaid` NÃO existe nesta instância.**
+- Se o recurso das páginas C4 for imagem anexada ou não for identificado, não gere diagrama: use lista numerada do fluxo e registre "diagrama pendente" no changelog.
+
+### 12.5 Horários e agendas
+
+- Cron traduzido em linguagem humana, em UTC e em horário de Brasília (UTC-3). Exemplo: `0 0 10 * * 1` = toda segunda às 10:00 UTC (07:00 em Brasília).
+- `runOnStartup: true` exige um `warning`: o timer também dispara em restart, scale-out e deploy.
+
+### 12.6 Exemplo de conversão
+
+Ruim (tabela de 2 colunas descrevendo um arquivo):
+
+```
+| Elemento    | Contrato                  |
+| Delimitador | ,                         |
+| Cabeçalho   | idEstado,nome,siglaEstado |
+| Lista vazia | Só o cabeçalho            |
+```
+
+Bom (exemplo + lista curta):
+
+```
+Exemplo de ageo-uf-ref.csv:
+[noformat]
+idEstado,nome,siglaEstado
+<valor>,<valor>,<valor>
+[/noformat]
+- Delimitador `,`, quebra de linha `\n`, UTF-8.
+- Espaços nas extremidades de `nome` e `siglaEstado` são removidos.
+- Se a API retornar lista vazia, o arquivo contém só o cabeçalho.
+```
+
+Valores de exemplo vêm de teste, fixture ou código. Se não houver, use `<placeholder>`. Nunca invente valores.
+
+### 12.7 Esqueleto no plano
+
+Na Fase 1, para cada página criada ou reformatada, inclua no plano o **esqueleto**: títulos das seções e o formato escolhido para cada bloco (exemplo, lista, numerada, prosa, tabela, macro), com o motivo quando for tabela. A Fase 2 segue o esqueleto aprovado.
+
+### 12.8 Verificação antes de salvar cada página
+
+Confira e reporte no changelog:
+- [ ] Nenhuma tabela de 2 colunas
+- [ ] Nenhuma tabela imediatamente seguida de outra
+- [ ] Nenhum fato repetido na página
+- [ ] Nenhuma macro fora das encontradas no espaço
+- [ ] Resumo rápido sem item genérico
+- [ ] Conteúdo de outro componente reduzido a 1 frase e link
+
+### 12.9 Regras gerais
+
 - Segredos: publique apenas o nome da referência, nunca o valor.
-- Reformatar para legibilidade não autoriza mudar conteúdo técnico. Toda informação existente deve continuar presente após a conversão.
+- Reformatar não autoriza mudar conteúdo técnico. Toda informação existente continua presente, ou é movida para a página dona dela (com link).

@@ -83,7 +83,7 @@ Encerre a Fase 1 com: `Aguardando aprovação. Responda APROVADO ou indique ajus
   - nome de recurso que você não encontrou literalmente no código;
   - risco de perder macro, formatação ou conteúdo.
 - Não prossiga para outros itens enquanto a pergunta não for respondida.
-- Ao terminar, entregue o changelog (seção 9).
+- Ao terminar, entregue o changelog (seção 10).
 
 ---
 
@@ -235,3 +235,37 @@ Referências (arquivos de código, ADRs relacionadas)
 - [ ] Criar seção/ADR sem checar duplicidade
 - [ ] Inventar nome, apelido ou nome de ambiente
 - [ ] Tocar em algo fora do escopo
+- [ ] Deixar em prosa uma enumeração, lógica condicional ou comparação (seção 12)
+- [ ] Publicar expressão cron sem tradução e fuso
+- [ ] Publicar valor de segredo
+
+---
+
+## 12. Legibilidade (obrigatório)
+
+O leitor tem pressa e escaneia a página. Prosa é exceção, estrutura é regra.
+
+| Se o conteúdo for... | Use |
+|---|---|
+| Contexto ou motivo (o "porquê") | Prosa, no máximo 3 frases por parágrafo |
+| Enumeração de 3 ou mais itens numa frase | Lista |
+| Itens com 2 ou mais atributos (variáveis, endpoints, tabelas, erros) | Tabela |
+| Lógica condicional (se/senão, fallback) | Tabela de decisão `Condição \| Comportamento`, em ordem de prioridade |
+| Sequência de 3 ou mais passos | Lista numerada |
+| Fluxo entre 2 ou mais componentes | Diagrama |
+| Comparação entre variantes (triggers, ambientes, modos) | Tabela lado a lado |
+| Risco, limitação ou comportamento não óbvio | `warning` ou `note` |
+| Setup local ou dica de desenvolvimento | `tip` dentro de `expand` |
+
+Regras complementares:
+- Toda página de componente e a Visão Geral abrem com um `panel` "Resumo rápido" de até 5 itens: o que faz, quando roda, entradas, saídas, onde falha.
+- Expressão cron sempre acompanhada da tradução em linguagem humana e do fuso. Exemplo: `0 0 10 * * 1` = toda segunda às 10:00 UTC. Se o fuso não estiver explícito no código ou na configuração, pergunte.
+- Diagramas: use o mesmo recurso de diagrama já usado nas páginas C4 do espaço. Se não identificar qual, pergunte no plano. Nunca publique texto de Mermaid ou PlantUML sem macro que o renderize.
+- No máximo 2 nomes técnicos por frase de texto corrido. Acima disso, vira lista ou tabela.
+- Padrões de tabela:
+  - Configuração: `Variável | Finalidade | Origem (app setting / Key Vault) | Obrigatória`
+  - Erros: `Cenário | Comportamento | Retorno / Log`
+  - Dependências: `Dependência | Tipo | Uso | Configurada por`
+  - Triggers: `Trigger | Tipo | Agenda ou rota | Autenticação | Tratamento de erro | Retorno`
+- Segredos: publique apenas o nome da referência, nunca o valor.
+- Reformatar para legibilidade não autoriza mudar conteúdo técnico. Toda informação existente deve continuar presente após a conversão.

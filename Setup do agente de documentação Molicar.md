@@ -105,7 +105,7 @@ Três ajustes, todos feitos na nossa instruction, sem editar os arquivos do tool
 
 ## Peças nossas
 
-Quatro arquivos que eu escrevo assim que você me trouxer as checagens 3 e 7. O nosso `documentacao.instructions.md` atual vira a base deles e deixa de ser anexado na mão com `#file`.
+Os quatro arquivos estão no kit-documentador.zip (harness Local, servidor mcp-atlassian, contrato da macro drawio lido em 02/10). O nosso `documentacao.instructions.md` atual vira a base deles e deixa de ser anexado na mão com `#file`.
 
 | Arquivo | O que faz | Ferramentas |
 | --- | --- | --- |
